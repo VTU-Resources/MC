@@ -1,60 +1,213 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VTU Belgaum - Pay for BCS402</title>
+  <title>VTU Belgaum - BCS402 Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
+    html, body {
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f5fbf9;
       margin: 0;
       padding: 30px;
-      text-align: center;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .brand-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a4d2e;
+    }
+    .section {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
     h2 {
+      color: #1a4d2e;
+      text-align: center;
+    }
+    .product {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 12px;
+      background: #f7fcfb;
+      border: 1px solid #d8ede6;
+      cursor: pointer;
+    }
+    .product:hover {
+      background: #e8fff5;
+    }
+    .product label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      pointer-events: none;
+    }
+    .product input {
+      transform: scale(1.3);
+      accent-color: #1a4d2e;
+      pointer-events: auto;
+    }
+    .combo {
+      background: #e6fff4;
+      border: 2px dashed #1a4d2e;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    .total {
+      text-align: right;
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 20px;
       color: #1a4d2e;
     }
     #pay-now {
       background: #1a4d2e;
       color: white;
-      padding: 14px 26px;
+      padding: 14px;
       font-size: 16px;
-      font-weight: 600;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      margin-top: 30px;
+      width: 100%;
+      margin-top: 20px;
+      text-align: center;
+      display: block;
+      text-decoration: none;
+    }
+    #pay-now:hover {
+      background: #145034;
     }
     #popup {
       display: none;
-      margin-top: 30px;
+      margin-top: 25px;
       background: #dff5e2;
       border: 1px solid #1a4d2e;
-      border-radius: 10px;
       padding: 20px;
+      border-radius: 12px;
       color: #1a4d2e;
+      text-align: center;
       font-weight: 600;
     }
   </style>
 </head>
 <body>
 
-  <h2>Pay for BCS402 Materials</h2>
-  <p>Total: ₹39</p>
+  <header>
+    <span class="brand-name">VTU Belgaum</span>
+  </header>
 
-  <a id="upiLink" href="upi://pay?pa=shridhar20062005-2@okaxis&pn=VTU%20Belgaum&tn=BCS402%20Materials&am=39&cu=INR">
-    <button id="pay-now">Proceed to Pay</button>
-  </a>
+  <section class="section">
+    <h2>BCS402 Microcontroller Resources</h2>
 
-  <div id="popup">✅ Payment Done! Materials will be sent within 60 minutes.</div>
+    <div class="combo" onclick="selectCombo()">✅ Get All 3 in Combo @ ₹222</div>
+
+    <div class="product" onclick="toggle('item1')">
+      <label><input type="checkbox" id="item1" data-price="42"> Notes M1 to M5</label>
+      <span>₹42</span>
+    </div>
+
+    <div class="product" onclick="toggle('item2')">
+      <label><input type="checkbox" id="item2" data-price="165"> Very Imp Questions M1 to M5</label>
+      <span>₹165</span>
+    </div>
+
+    <div class="product" onclick="toggle('item3')">
+      <label><input type="checkbox" id="item3" data-price="39"> Model Papers</label>
+      <span>₹39</span>
+    </div>
+
+    <div class="total">Total: ₹<span id="total">0</span></div>
+
+    <!-- Hidden UPI link wrapper -->
+    <a id="upiLink" href="#" target="_blank">
+      <button id="pay-now">Proceed to Pay</button>
+    </a>
+
+    <div id="popup">✅ Payment Done! Materials will be sent via email/WhatsApp within 60 mins.</div>
+  </section>
 
   <script>
-    document.getElementById("upiLink").addEventListener("click", function () {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const totalDisplay = document.getElementById('total');
+    const upiLink = document.getElementById('upiLink');
+    const popup = document.getElementById('popup');
+
+    checkboxes.forEach(box => {
+      box.addEventListener('change', updateTotal);
+    });
+
+    function toggle(id) {
+      const cb = document.getElementById(id);
+      cb.checked = !cb.checked;
+      updateTotal();
+    }
+
+    function selectCombo() {
+      document.getElementById('item1').checked = true;
+      document.getElementById('item2').checked = true;
+      document.getElementById('item3').checked = true;
+      updateTotal(222);
+    }
+
+    function updateTotal(forceAmount = null) {
+      if (forceAmount !== null) {
+        totalDisplay.textContent = forceAmount;
+        updateUpiLink(forceAmount);
+        return;
+      }
+
+      let total = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) total += parseFloat(cb.dataset.price);
+      });
+      totalDisplay.textContent = total;
+      updateUpiLink(total);
+    }
+
+    function updateUpiLink(amount) {
+      if (amount === 0) {
+        upiLink.href = "#";
+        return;
+      }
+      const upiId = "shridhar20062005-2@okaxis";
+      const name = "VTU Belgaum";
+      const note = "BCS402 Materials";
+      const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&tn=${encodeURIComponent(note)}&am=${amount}&cu=INR`;
+      upiLink.href = upiUrl;
+    }
+
+    upiLink.addEventListener('click', function () {
+      if (upiLink.href === "#") {
+        alert("Please select at least one item to proceed.");
+        return;
+      }
+
+      // Wait and show confirmation popup
       setTimeout(() => {
-        document.getElementById("popup").style.display = "block";
-      }, 7000); // Wait 7 seconds after redirect to show popup
+        popup.style.display = 'block';
+      }, 7000);
     });
   </script>
+
 </body>
 </html>
