@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     html, body {
-      -webkit-tap-highlight-color: transparent; /* REMOVE MOBILE BLUE TAP FLASH */
+      -webkit-tap-highlight-color: transparent;
     }
     body {
       font-family: 'Poppins', sans-serif;
@@ -19,7 +19,6 @@
       padding: 10px 20px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     }
     .brand-logo {
@@ -72,14 +71,12 @@
       transition: background 0.2s ease;
       cursor: pointer;
       user-select: none;
-      -webkit-user-select: none;
     }
     .product:hover {
       background: #f1fff9;
     }
     .product .info {
       display: flex;
-      align-items: flex-start;
       flex-direction: column;
       gap: 4px;
     }
@@ -247,14 +244,21 @@
     function proceedToPay() {
       const total = parseFloat(totalAmount.textContent);
       if (total === 0) return alert("Please select at least one item.");
+
       const upi = "shridhar20062005-2@okaxis";
       const name = "VTU Belgaum";
       const note = "BCS402 Materials";
-      const url = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&tn=${encodeURIComponent(note)}&am=${total}&cu=INR`;
+      const amount = total;
 
-      window.location.href = url;
+      const upiUrl = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&tn=${encodeURIComponent(note)}&am=${amount}&cu=INR`;
 
-      // Delay popup for when user returns from app
+      const a = document.createElement("a");
+      a.href = upiUrl;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
       setTimeout(() => {
         document.getElementById("popup").style.display = "flex";
       }, 6000);
