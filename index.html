@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VTU Belgaum - BCS402 Cart Checkout</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -66,25 +66,38 @@
       background: #f7fcfb;
       border: 1px solid #d8ede6;
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+      transition: background 0.2s ease;
+      cursor: pointer;
     }
     .product:hover {
       background: #f1fff9;
     }
+    .product .info {
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
     .product label {
       font-size: 16px;
       color: #2a2a2a;
-      cursor: pointer;
       display: flex;
       align-items: center;
+      gap: 10px;
     }
     .product input {
-      margin-right: 12px;
-      transform: scale(1.4);
+      transform: scale(1.3);
       accent-color: #1a4d2e;
+      cursor: pointer;
     }
     .price {
       font-weight: 600;
       color: #1a4d2e;
+      text-align: right;
+    }
+    .purchased {
+      font-size: 12px;
+      color: #777;
     }
     .total {
       font-weight: 700;
@@ -109,7 +122,7 @@
     button:hover {
       background: #145034;
     }
-    .overlay, .popup {
+    .overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
@@ -154,28 +167,36 @@
 </head>
 <body>
   <header>
-    <img src="1.png" alt="VTU Logo" class="brand-logo">
+    <img src="1.png" alt="VTU Logo" class="brand-logo" />
     <span class="brand-name">VTU Belgaum</span>
   </header>
 
   <section class="section">
     <h2>BCS402 Microcontroller Resources</h2>
-    <div class="combo" onclick="selectCombo()">
-      ✅ Get All 3 in Combo @ Just ₹222 (Original ₹815)
-    </div>
 
-    <div class="product">
-      <label><input type="checkbox" class="item" data-price="42" id="item1">Notes M1 to M5</label>
+    <div class="combo" onclick="selectCombo()">✅ Get All 3 in Combo @ Just ₹222 (Original ₹815)</div>
+
+    <div class="product" onclick="toggleCheckbox('item1')">
+      <div class="info">
+        <label><input type="checkbox" class="item" data-price="42" id="item1">Notes M1 to M5</label>
+        <span class="purchased">Already 367+ purchased</span>
+      </div>
       <div class="price"><del>₹215</del> ₹42</div>
     </div>
 
-    <div class="product">
-      <label><input type="checkbox" class="item" data-price="165" id="item2">Very Imp Questions M1 to M5</label>
+    <div class="product" onclick="toggleCheckbox('item2')">
+      <div class="info">
+        <label><input type="checkbox" class="item" data-price="165" id="item2">Very Imp Questions M1 to M5</label>
+        <span class="purchased">Already 422+ purchased</span>
+      </div>
       <div class="price"><del>₹515</del> ₹165</div>
     </div>
 
-    <div class="product">
-      <label><input type="checkbox" class="item" data-price="39" id="item3">Model Papers</label>
+    <div class="product" onclick="toggleCheckbox('item3')">
+      <div class="info">
+        <label><input type="checkbox" class="item" data-price="39" id="item3">Model Papers</label>
+        <span class="purchased">Already 289+ purchased</span>
+      </div>
       <div class="price"><del>₹85</del> ₹39</div>
     </div>
 
@@ -185,8 +206,8 @@
 
   <div class="overlay" id="popup">
     <div class="popup-box">
-      <h3>✅ UPI App Opened</h3>
-      <p>Please complete the payment. Once done, your resources will be delivered via email within 60 minutes.</p>
+      <h3>✅ Payment Confirmed</h3>
+      <p>Your resources will be delivered via email within 60 minutes.</p>
       <button onclick="window.location.reload()">OK</button>
     </div>
   </div>
@@ -195,47 +216,42 @@
     const checkboxes = document.querySelectorAll('.item');
     const totalAmount = document.getElementById('totalAmount');
 
-    checkboxes.forEach(chk => {
-      chk.addEventListener('change', calculateTotal);
-    });
+    checkboxes.forEach(chk => chk.addEventListener('change', calculateTotal));
 
     function calculateTotal() {
       let total = 0;
       checkboxes.forEach(chk => {
-        if (chk.checked) {
-          total += parseFloat(chk.dataset.price);
-        }
+        if (chk.checked) total += parseFloat(chk.dataset.price);
       });
       totalAmount.textContent = total;
     }
 
+    function toggleCheckbox(id) {
+      const box = document.getElementById(id);
+      box.checked = !box.checked;
+      calculateTotal();
+    }
+
     function selectCombo() {
-      document.getElementById('item1').checked = true;
-      document.getElementById('item2').checked = true;
-      document.getElementById('item3').checked = true;
+      ['item1', 'item2', 'item3'].forEach(id => document.getElementById(id).checked = true);
       totalAmount.textContent = 222;
     }
 
     function proceedToPay() {
       const total = parseFloat(totalAmount.textContent);
-      if (total === 0) {
-        alert("Please select at least one item.");
-        return;
-      }
-
-      const upiID = "shridhar20062005-2@okaxis";
+      if (total === 0) return alert("Please select at least one item.");
+      const upi = "shridhar20062005-2@okaxis";
       const name = "VTU Belgaum";
       const note = "BCS402 Materials";
-      const amount = total;
+      const url = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&tn=${encodeURIComponent(note)}&am=${total}&cu=INR`;
 
-      const url = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(name)}&tn=${encodeURIComponent(note)}&am=${amount}&cu=INR`;
-
+      // Open UPI app
       window.location.href = url;
 
-      // Show popup after redirect
+      // Show popup after user returns back from UPI app (simulated after 6 seconds)
       setTimeout(() => {
         document.getElementById("popup").style.display = "flex";
-      }, 1500);
+      }, 6000); // Adjust delay as needed
     }
   </script>
 </body>
